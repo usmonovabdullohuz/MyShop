@@ -1,0 +1,160 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if query %}Qidiruv: {{ query }}{% elif category %}{{ category.name }}{% else %}Barcha mahsulotlar{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% if not category and not query %}
+    {% if banners %}
+    <div class="promo-slider-container">
+        <button class="slider-arrow prev-arrow" id="slidePrev" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <div class="promo-scroll" id="promoScroll">
+            {% for banner in banners %}
+            <a href="{{ banner.get_absolute_url }}" class="promo-card {{ banner.color }}" style="text-decoration:none;">
+                {% if banner.image %}
+                <img src="{{ banner.image.url }}" class="promo-card-img" alt="{{ banner.title }}">
+                {% endif %}
+                <div class="promo-card-content">
+                    <span class="promo-badge">{{ banner.badge_text }}</span>
+                    <h3 class="promo-title">{{ banner.title|linebreaksbr }}</h3>
+                    <p class="promo-subtitle">{{ banner.subtitle }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <button class="slider-arrow next-arrow" id="slideNext" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+
+
+    </div>
+    {% endif %}
+
+    <h3 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Kategoriyalar
+    </h3>
+    <div class="category-pills-scroll">
+        {% for c in categories %}
+        <a href="{% url 'blog:product_list_by_category' c.slug %}" class="category-pill-card">
+                <span class="category-pill-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path
+                            d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line
+                            x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                </span>
+            {{ c.name }}
+        </a>
+        {% endfor %}
+    </div>
+{% endif %} <div class="page-hero">
+    {% if query %}
+    <h2>"{{ query }}" bo'yicha qidiruv natijalari</h2>
+    {% else %}
+    <h2>{% if category %}{{ category.name }}{% else %}Barcha mahsulotlar{% endif %}</h2>
+    {% endif %}
+    <p class="subtitle">{{ products|length }} ta mahsulot topildi</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="category-sidebar">
+            <h5>Kategoriyalar</h5>
+            <div class="list-group">
+                <a href="{% url 'blog:product_list' %}"
+                   class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
+                    Barchasi
+                </a>
+                {% for c in categories %}
+                <a href="{% url 'blog:product_list_by_category' c.slug %}"
+                   class="list-group-item list-group-item-action {% if category.slug == c.slug %}active{% endif %}">
+                    {{ c.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in products %}
+            <div class="col">
+                <div class="card h-100">
+                    <a href="{{ product.get_absolute_url }}" style="text-decoration:none; color:inherit;">
+                        <div class="card-img-wrapper" style="position: relative;">
+
+                            {% if product.has_discount %}
+                            <span class="discount-badge-corner">-{{ product.discount_percent }}%</span>
+                            {% endif %}
+
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                            <div class="card-img-placeholder">Rasm yo'q</div>
+                            {% endif %}
+                            <div class="price-tag-wrapper">
+                                {% if product.has_discount %}
+                                <span class="old-price">${{ product.price }}</span>
+                                <span class="price-tag">${{ product.discounted_price }}</span>
+                                {% else %}
+                                <span class="price-tag">${{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <span class="card-category-tag">{{ product.category.name }}</span>
+                        <h5 class="card-title">{{ product.name }}</h5>
+
+                        <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
+                            <a href="{{ product.get_absolute_url }}" class="btn btn-primary flex-grow-1">Batafsil</a>
+
+                            <button class="wishlist-toggle-btn btn d-inline-flex align-items-center justify-content-center p-0"
+                                    data-url="{% url 'blog:toggle_wishlist' product.id %}"
+                                    data-product-id="{{ product.id }}"
+                                    style="width: 38px; height: 38px; min-width: 38px; border: none; background: transparent; cursor: pointer;">
+                                <svg class="heart-icon" viewBox="0 0 24 24"
+                                     fill="{% if product.id in wishlist_ids %}#ff4a6b{% else %}none{% endif %}"
+                                     stroke="#ff4a6b" stroke-width="2"
+                                     style="width: 20px; height: 20px; transition: fill 0.2s;">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                {% if query %}
+                <p>"{{ query }}" bo'yicha hech narsa topilmadi.</p>
+                {% else %}
+                <p>Hozircha mahsulotlar marginsiz emas.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

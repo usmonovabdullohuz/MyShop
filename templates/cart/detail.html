@@ -1,0 +1,59 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Savat{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Sizning savatingiz</h2>
+
+{% if cart.items.all %}
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Mahsulot</th>
+            <th>Narxi</th>
+            <th>Miqdori</th>
+            <th>Jami</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart.items.all %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>
+                {% if item.product.has_discount %}
+                    <span class="old-price">${{ item.product.price }}</span>
+                    <span style="color: var(--accent-gold); font-weight: 600;">${{ item.product.discounted_price }}</span>
+                    <span class="discount-badge">-{{ item.product.discount_percent }}%</span>
+                {% else %}
+                    ${{ item.product.price }}
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{% url 'cart:cart_update' item.id %}" class="d-flex">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width:80px;">
+                    <button type="submit" style="transition: .3s;" class="btn btn-outline-primary ms-2">Yangilash</button>
+                </form>
+            </td>
+            <td>${{ item.get_total_price }}</td>
+            <td>
+                <a href="{% url 'cart:cart_remove' item.id %}" style="transition: .3s"  class="btn btn-danger btn-sm">O'chirish</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="text-end">
+    <h4>Jami: ${{ cart.get_total_price }}</h4>
+    <a href="{% url 'blog:product_list' %}" class="btn btn-outline-secondary">Xarid qilishni davom ettirish</a>
+    <a href="{% url 'orders:checkout' %}" class="btn btn-success">Buyurtma berish</a>
+</div>
+
+{% else %}
+<p>Savatingiz bo'sh.</p>
+<a href="{% url 'blog:product_list' %}" class="btn btn-primary">Xarid qilishni boshlash</a>
+{% endif %}
+
+{% endblock %}

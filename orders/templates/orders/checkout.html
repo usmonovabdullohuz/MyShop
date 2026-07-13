@@ -1,0 +1,53 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Buyurtmani rasmiylashtirish{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">Buyurtmani rasmiylashtirish</h2>
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="auth-card">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <div class="form-text text-muted small">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100">Buyurtmani tasdiqlash</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="auth-card">
+                    <h5 class="mb-3">Savatingiz</h5>
+                    <ul class="list-unstyled">
+                        {% for item in cart.items.all %}
+                        <li class="d-flex justify-content-between mb-2">
+                            <span>{{ item.product.name }} <span class="text-muted">x{{ item.quantity }}</span></span>
+                            <span>${{ item.get_total_price }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Jami:</span>
+                        <span>${{ cart.get_total_price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

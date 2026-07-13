@@ -1,0 +1,53 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Mening buyurtmalarim{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Mening buyurtmalarim</h2>
+
+{% if orders %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Sana</th>
+                <th>Mahsulotlar soni</th>
+                <th>Jami summa</th>
+                <th>Holat</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.created|date:"d.m.Y H:i" }}</td>
+                <td>{{ order.get_total_items }} ta</td>
+                <td>${{ order.get_total_price }}</td>
+                <td>
+                    <span class="badge
+                        {% if order.status == 'pending' %}bg-warning text-dark
+                        {% elif order.status == 'paid' %}bg-info text-dark
+                        {% elif order.status == 'shipped' %}bg-primary
+                        {% elif order.status == 'completed' %}bg-success
+                        {% elif order.status == 'cancelled' %}bg-secondary
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">Batafsil</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="auth-card text-center">
+    <p class="mb-3">Sizda hali buyurtmalar yo'q.</p>
+    <a href="{% url 'blog:product_list' %}" class="btn btn-primary">Xarid qilishni boshlash</a>
+</div>
+{% endif %}
+{% endblock %}

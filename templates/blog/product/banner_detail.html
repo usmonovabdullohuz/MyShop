@@ -1,0 +1,86 @@
+{% extends "blog/base.html" %}
+
+{% block title %}{{ banner.title }}{% endblock %}
+
+{% block content %}
+
+<div class="sale-hero {{ banner.color }}">
+    {% if banner.image %}
+    <img src="{{ banner.image.url }}" class="sale-hero-bg" alt="{{ banner.title }}">
+    {% endif %}
+    <div class="sale-hero-overlay"></div>
+
+    <div class="sale-hero-inner">
+        <div class="sale-hero-left">
+            <span class="promo-badge {% if banner.color == 'promo-2' or banner.color == 'promo-4' %}teal{% endif %}">{{ banner.badge_text }}</span>
+            <h1 class="sale-hero-title">{{ banner.title|linebreaksbr }}</h1>
+            <p class="sale-hero-subtitle">{{ banner.subtitle }}</p>
+            <a href="#products" class="btn btn-gold sale-hero-cta">Mahsulotlarni ko'rish</a>
+        </div>
+
+        <div class="sale-hero-right">
+            <div class="sale-percent-plate">
+                <span class="sale-percent-number">{{ banner.subtitle }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-hero" id="products">
+    <h2>Ushbu bo'limdagi mahsulotlar</h2>
+    <p class="subtitle">{{ products|length }} ta mahsulot topildi</p>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for product in products %}
+    <div class="col">
+        <div class="card h-100">
+            <a href="{{ product.get_absolute_url }}" style="text-decoration:none; color:inherit;">
+                <div class="card-img-wrapper">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="card-img-placeholder">Rasm yo'q</div>
+                    {% endif %}
+                    {% if product.has_discount %}
+                    <span style="    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    background: var(--accent-danger);
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(232, 93, 93, 0.45);">
+    -{{ product.discount_percent }}%
+</span>
+                    {% endif %}
+                    <div class="price-tag-wrapper">
+                        {% if product.has_discount %}
+                        <span class="old-price">${{ product.price }}</span>
+                        <span class="price-tag">${{ product.discounted_price }}</span>
+                        {% else %}
+                        <span class="price-tag">${{ product.price }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            <div class="card-body d-flex flex-column">
+                <span class="card-category-tag">{{ product.category.name }}</span>
+                <h5 class="card-title">{{ product.name }}</h5>
+                <a href="{{ product.get_absolute_url }}" class="btn btn-primary mt-auto">Batafsil</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.5 5M17 13l2.5 5M9 21a1 1 0 100-2 1 1 0 000 2zM20 21a1 1 0 100-2 1 1 0 000 2z"/>
+        </svg>
+        <p>Bu bo'limda hozircha mahsulotlar mavjud emas.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
