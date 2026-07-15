@@ -13,8 +13,7 @@ SECRET_KEY = os.environ.get(
     "_r9*k7)3m_gz&163msr(@iwr42+qrrl89+vtitm%w!253%+0cd"
 )
 
-# PythonAnywhere'da False qiling! Xato haqida ortiqcha ma'lumot ko'rsatmaslik uchun.
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "usmonov77.pythonanywhere.com",  # <-- o'zingizning PythonAnywhere usernameingizni yozing
@@ -49,6 +48,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
@@ -73,14 +73,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database parolni environment variable'dan olish xavfsizroq.
 # Agar DATABASE_URL environment variable topilmasa, pastdagi default ishlatiladi.
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get(
-            'DATABASE_URL',
-            'postgresql://neondb_owner:npg_JqP2H8xWmuEk@ep-soft-tree-atz3q8po.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require'
-        ),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [

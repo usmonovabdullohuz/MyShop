@@ -6,6 +6,7 @@
 <h2 class="mb-4">Sizning savatingiz</h2>
 
 {% if cart.items.all %}
+<div class="table-responsive-wrap">
 <table class="table align-middle">
     <thead>
         <tr>
@@ -44,6 +45,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 <div class="text-end">
     <h4>Jami: ${{ cart.get_total_price }}</h4>

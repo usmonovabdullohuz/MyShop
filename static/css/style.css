@@ -23,11 +23,17 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 body {
     background-color: var(--bg-deep);
     color: var(--text-light);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
+    max-width: 100vw;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -1221,8 +1227,20 @@ a {
 }
 
 /* ==========================================================================
-   TABLE (savat)
+   TABLE (savat) - mobil ekranda gorizontal scroll faqat jadval ichida bo'lsin,
+   butun sahifa kengaymasin
    ========================================================================== */
+.table-responsive-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-wrap .table {
+    min-width: 560px;
+    margin-bottom: 0;
+}
+
 .table {
     color: var(--text-light);
 }
@@ -2406,16 +2424,24 @@ footer {
     color: var(--accent-danger);
 }
 
-/* Pastki tab-bar navigatsiya */
+/* Pastki tab-bar navigatsiya - endi body darajasida, fixed, barcha sahifalarda ko'rinadi */
 .mobile-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
     display: flex;
+    flex-wrap: nowrap;
     align-items: stretch;
     justify-content: space-around;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
     border-top: 1px solid var(--border-soft);
     background: #14152580;
     backdrop-filter: blur(10px);
     padding: 0.5rem 0.3rem calc(0.5rem + env(safe-area-inset-bottom));
-    flex-shrink: 0;
 }
 
 .mobile-tabbar-item {
@@ -2426,12 +2452,14 @@ footer {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.35rem 0.4rem;
+    padding: 0.35rem 0.2rem;
     border-radius: 10px;
-    flex: 1;
+    flex: 1 1 0;
+    width: 0;
     min-width: 0;
+    box-sizing: border-box;
     transition: color 0.2s ease;
 }
 
@@ -2440,6 +2468,8 @@ footer {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+    width: 100%;
+    text-align: center;
 }
 
 .mobile-tabbar-item svg {
@@ -2455,10 +2485,19 @@ footer {
     color: var(--accent-gold) !important;
 }
 
+/* Tabbar endi fixed bo'lgani uchun sahifa kontenti uning ostida qolib
+   ketmasligi uchun body'ga pastdan bo'sh joy qo'shamiz (faqat mobil) */
+@media (max-width: 991px) {
+    body {
+        padding-bottom: 72px;
+    }
+}
+
 /* Faqat mobil ekranlarda ko'rinishi kerak bo'lgan offcanvas'lar */
 @media (min-width: 992px) {
     .mobile-search-canvas,
-    .mobile-menu-canvas {
+    .mobile-menu-canvas,
+    .mobile-tabbar {
         display: none !important;
     }
 }

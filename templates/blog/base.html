@@ -366,56 +366,56 @@
         </div>
         {% endif %}
     </div>
+</div>
 
-    <!-- Pastki mobil tab-bar -->
-    <div class="mobile-tabbar">
-        <a href="{% url 'blog:product_list' %}" class="mobile-tabbar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            <span>Bosh sahifa</span>
-        </a>
-        <button type="button" class="mobile-tabbar-item mobile-tabbar-active" data-bs-dismiss="offcanvas">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-            <span>Katalog</span>
-        </button>
-        <a href="{% url 'cart:cart_detail' %}" class="mobile-tabbar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"></path>
-            </svg>
-            <span>Savat</span>
-        </a>
-        <a href="{% if user.is_authenticated %}{% url 'blog:wishlist_detail' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="mobile-tabbar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-            <span>Sevimlilar</span>
-        </a>
-        {% if user.is_authenticated %}
-        <a href="{% url 'accounts:profile_detail' %}" class="mobile-tabbar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span>{{ user.username|truncatechars:8 }}</span>
-        </a>
-        {% else %}
-        <a href="{% url 'accounts:login' %}" class="mobile-tabbar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span>Kirish</span>
-        </a>
-        {% endif %}
-    </div>
+<!-- ============ PASTKI MOBIL TAB-BAR (barcha sahifalarda ko'rinadi) ============ -->
+<div class="mobile-tabbar d-flex d-lg-none">
+    <a href="{% url 'blog:product_list' %}" class="mobile-tabbar-item {% if request.resolver_match.url_name == 'product_list' and not request.GET.q %}mobile-tabbar-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Bosh sahifa</span>
+    </a>
+    <button type="button" class="mobile-tabbar-item" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span>Katalog</span>
+    </button>
+    <a href="{% url 'cart:cart_detail' %}" class="mobile-tabbar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"></path>
+        </svg>
+        <span>Savat</span>
+    </a>
+    <a href="{% if user.is_authenticated %}{% url 'blog:wishlist_detail' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="mobile-tabbar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <span>Sevimlilar</span>
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'accounts:profile_detail' %}" class="mobile-tabbar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>{{ user.username|truncatechars:8 }}</span>
+    </a>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="mobile-tabbar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Kirish</span>
+    </a>
+    {% endif %}
 </div>
 
 <div class="container mt-4" style="padding-top: 8rem;">
