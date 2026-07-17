@@ -33,7 +33,7 @@ body {
     color: var(--text-light);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    max-width: 100vw;
+    width: 100%;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -914,16 +914,19 @@ a {
 }
 
 .card-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
     padding: 1.2rem;
     box-sizing: border-box;
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(1) translateZ(0) !important;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 .card:hover .card-img-wrapper img {
-    transform: scale(1.08);
+    transform: scale(1.08) translateZ(0) !important;
 }
 
 .card-img-wrapper::after {
@@ -1285,14 +1288,10 @@ footer {
 .auth-card::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(242, 184, 75, 0.06) 0%, transparent 60%);
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(242, 184, 75, 0.1) 0%, transparent 55%);
     pointer-events: none;
     border-radius: inherit;
-    overflow: hidden;
     z-index: 0;
 }
 
@@ -1996,13 +1995,87 @@ footer {
     pointer-events: none;
 }
 
-.loader-spinner {
+/* ==========================================================================
+   GLOBAL SPINNER (ma'lumot fetch qilinayotganda ko'rinadigan overlay)
+   ========================================================================== */
+/* ==========================================================================
+   GLOBAL SPINNER (ma'lumot fetch qilinayotganda ko'rinadigan overlay)
+   ========================================================================== */
+.global-spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    z-index: 10500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.global-spinner-overlay.show {
+    opacity: 0.85;
+    visibility: visible;
+}
+
+.global-spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(242, 184, 75, 0.15);
-    border-top-color: var(--accent-gold);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    border: 4px solid rgba(245, 243, 247, 0.15);
+    border-top-color: var(--accent-gold);
+    animation: global-spinner-spin 0.7s linear infinite;
+}
+
+@keyframes global-spinner-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .global-spinner {
+        animation-duration: 1.4s;
+    }
+}
+
+.loader-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.loader-brand-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: pulse 1.6s ease-in-out infinite;
+    letter-spacing: -0.02em;
+}
+
+.loader-bar-track {
+    width: 140px;
+    height: 3px;
+    border-radius: 10px;
+    background: rgba(245, 243, 247, 0.1);
+    overflow: hidden;
+}
+
+.loader-bar-fill {
+    width: 40%;
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-teal));
+    animation: loader-bar-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes loader-bar-slide {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(350%); }
 }
 
 /* ==========================================================================
@@ -2509,6 +2582,162 @@ footer {
 }
 
 /* ==========================================================================
+   RASM LIGHTBOX (mahsulot detail sahifasida rasmni kattalashtirish)
+   ========================================================================== */
+.image-lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.92);
+    backdrop-filter: blur(6px);
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 2rem;
+}
+
+.image-lightbox-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(245, 243, 247, 0.1);
+    border: 1px solid var(--border-soft);
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lightbox-close:hover {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+}
+
+.lightbox-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+@media (max-width: 768px) {
+    .lightbox-close {
+        top: 12px;
+        right: 12px;
+    }
+}
+
+/* ==========================================================================
+   INTERAKTIV YULDUZCHA REYTING (sharh formasi)
+   ========================================================================== */
+.star-rating-input {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.star-rating-btn {
+    background: none;
+    border: none;
+    padding: 0.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.15s ease, transform 0.15s ease;
+    line-height: 0;
+}
+
+.star-rating-btn svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: currentColor;
+    transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.star-rating-btn:hover,
+.star-rating-btn:hover ~ .star-rating-btn {
+    color: var(--text-muted);
+}
+
+.star-rating-input:hover .star-rating-btn {
+    color: var(--text-muted);
+}
+
+.star-rating-input .star-rating-btn:hover svg,
+.star-rating-input .star-rating-btn.hovered svg {
+    transform: scale(1.1);
+}
+
+.star-rating-btn.hovered,
+.star-rating-btn.selected {
+    color: var(--accent-gold);
+}
+
+.star-rating-btn.hovered svg,
+.star-rating-btn.selected svg {
+    fill: var(--accent-gold);
+    stroke: var(--accent-gold);
+}
+
+/* ==========================================================================
+   RASM SKELETON (rasm yuklanguncha ko'rinadigan animatsiyali joy)
+   ========================================================================== */
+@keyframes skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.img-skeleton-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.img-skeleton-wrapper img {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.img-skeleton-wrapper img.img-loaded {
+    opacity: 1;
+}
+
+.img-skeleton-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        var(--bg-card) 25%,
+        var(--bg-card-hover) 50%,
+        var(--bg-card) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.img-skeleton-wrapper.img-loaded::before {
+    opacity: 0;
+}
+
+/* ==========================================================================
    ACCESSIBILITY: HARAKATNI KAMAYTIRISH
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -2517,4 +2746,16 @@ footer {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ==========================================================================
+   XAVFSIZLIK TARMOG'I: rasm va yulduzcha widget tashqariga chiqmasin
+   ========================================================================== */
+.star-rating-input {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.img-skeleton-wrapper {
+    max-width: 100%;
 }

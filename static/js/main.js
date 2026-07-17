@@ -1,3 +1,27 @@
+// ============ RATING SELECT'NI CUSTOM-SELECT'DAN CHETLASH ============
+// Bu darhol ishga tushishi kerak, initCustomSelects() ishlashidan oldin
+(function markRatingSelect() {
+    const wrapper = document.getElementById('starRatingInput');
+    if (!wrapper) return;
+    const hiddenSelect = wrapper.parentElement.querySelector('select');
+    if (hiddenSelect) hiddenSelect.classList.add('rating-hidden-select');
+})();
+
+// ============ RASM SKELETON: KESHDAN DARHOL YUKLANGAN RASMLAR UCHUN ZAXIRA ============
+// Ba'zi brauzerlarda onload eventi keshdagi rasm uchun chaqirilmasligi mumkin
+function checkCachedImages() {
+    document.querySelectorAll('.img-skeleton-wrapper img').forEach(img => {
+        if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('img-loaded');
+            img.parentElement.classList.add('img-loaded');
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', checkCachedImages);
+if (document.readyState !== 'loading') {
+    checkCachedImages();
+}
+
 // ============ PAGE LOADER ============
 function hideLoader() {
     const loader = document.getElementById('page-loader');
@@ -8,6 +32,46 @@ function hideLoader() {
 
 window.addEventListener('load', hideLoader);
 setTimeout(hideLoader, 2000);
+
+// ============ GLOBAL SPINNER (ma'lumot fetch qilinayotganda) ============
+// Har qanday AJAX so'rovi paytida ishlatish uchun: showSpinner() / hideSpinner()
+// Bir nechta so'rov bir vaqtda ketayotgan bo'lsa ham to'g'ri ishlashi uchun counter ishlatiladi.
+let __activeRequestCount = 0;
+
+function getSpinnerOverlay() {
+    let overlay = document.getElementById('global-spinner-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'global-spinner-overlay';
+        overlay.className = 'global-spinner-overlay';
+        overlay.innerHTML = '<div class="global-spinner"></div>';
+        document.body.appendChild(overlay);
+    }
+    return overlay;
+}
+
+function showSpinner() {
+    __activeRequestCount++;
+    const overlay = getSpinnerOverlay();
+    overlay.classList.add('show');
+}
+
+function hideSpinner() {
+    __activeRequestCount = Math.max(0, __activeRequestCount - 1);
+    if (__activeRequestCount === 0) {
+        const overlay = document.getElementById('global-spinner-overlay');
+        if (overlay) overlay.classList.remove('show');
+    }
+}
+
+// Orqaga/oldinga qaytilganda (bfcache) spinner ilib qolmasligi uchun
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+        __activeRequestCount = 0;
+        const overlay = document.getElementById('global-spinner-overlay');
+        if (overlay) overlay.classList.remove('show');
+    }
+});
 
 // ============ NAVBAR SCROLL EFFEKTI + PROGRESS + BACK TO TOP ============
 const navbar = document.getElementById('mainNavbar');
@@ -86,6 +150,7 @@ document.querySelectorAll('form').forEach(form => {
         if (submitBtn && !submitBtn.classList.contains('no-loading')) {
             submitBtn.classList.add('is-loading');
         }
+        showSpinner();
     });
 });
 
@@ -113,7 +178,7 @@ function showToast(message) {
 
 // ============ CUSTOM SELECT (dizaynga mos ochiladigan dropdown) ============
 function initCustomSelects() {
-    document.querySelectorAll('select.form-select:not(.custom-select-done)').forEach(select => {
+    document.querySelectorAll('select.form-select:not(.custom-select-done):not(.rating-hidden-select)').forEach(select => {
         select.classList.add('custom-select-done');
 
         const wrapper = document.createElement('div');
@@ -217,6 +282,7 @@ document.querySelectorAll('.wishlist-toggle-btn').forEach(btn => {
         const url = btn.dataset.url;
         if (!url) return;
 
+        showSpinner();
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -233,10 +299,12 @@ document.querySelectorAll('.wishlist-toggle-btn').forEach(btn => {
 
             if (data.wished) {
                 heartIcon.setAttribute('fill', '#ff4a6b');
-                btn.classList.add('wished');
+                btn.classList.add('wished', 'active');
+                showToast("Sevimlilarga qo'shildi");
             } else {
                 heartIcon.setAttribute('fill', 'none');
-                btn.classList.remove('wished');
+                btn.classList.remove('wished', 'active');
+                showToast("Sevimlilardan olib tashlandi");
             }
 
             const badge = document.querySelector('.wishlist-badge');
@@ -244,11 +312,136 @@ document.querySelectorAll('.wishlist-toggle-btn').forEach(btn => {
 
         } catch (err) {
             console.error('Wishlist xatosi:', err);
+        } finally {
+            hideSpinner();
         }
     });
 });
 
-// ============ BANNER AVTO-SLIDER VA PROGRESS BAR ============
+// ============ SAVATGA QO'SHISH (AJAX + TOAST) ============
+document.querySelectorAll('.cart-add-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const url = btn.dataset.url;
+        if (!url || btn.classList.contains('is-loading')) return;
+
+        btn.classList.add('is-loading');
+        showSpinner();
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (response.status === 403 || response.redirected) {
+                window.location.href = '/accounts/login/';
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast(data.message);
+                const cartBadge = document.querySelector('.cart-count-badge');
+                if (cartBadge && typeof data.cart_count !== 'undefined') {
+                    cartBadge.textContent = data.cart_count;
+                }
+            }
+        } catch (err) {
+            console.error('Savatga qo\'shish xatosi:', err);
+        } finally {
+            btn.classList.remove('is-loading');
+            hideSpinner();
+        }
+    });
+});
+
+// ============ INTERAKTIV YULDUZCHA REYTING (sharh formasi) ============
+// ============ INTERAKTIV YULDUZCHA REYTING (sharh formasi) ============
+function initStarRating() {
+    const wrapper = document.getElementById('starRatingInput');
+    if (!wrapper) return;
+
+    const hiddenSelect = wrapper.parentElement.querySelector('select');
+    if (!hiddenSelect) return;
+
+    const stars = Array.from(wrapper.querySelectorAll('.star-rating-btn'));
+
+    function paintStars(upToValue) {
+        stars.forEach(star => {
+            const value = parseInt(star.dataset.value, 10);
+            star.classList.toggle('hovered', value <= upToValue);
+        });
+    }
+
+    function selectValue(value) {
+        hiddenSelect.value = value;
+        hiddenSelect.dispatchEvent(new Event('change'));
+        stars.forEach(star => {
+            const starValue = parseInt(star.dataset.value, 10);
+            star.classList.toggle('selected', starValue <= value);
+        });
+    }
+
+    stars.forEach(star => {
+        const value = star.dataset.value;
+
+        star.addEventListener('mouseenter', () => paintStars(parseInt(value, 10)));
+        star.addEventListener('click', () => selectValue(value));
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+        stars.forEach(star => star.classList.remove('hovered'));
+    });
+
+    // Agar formada oldindan tanlangan qiymat bo'lsa (masalan validatsiya xatosidan keyin qayta ko'rsatilsa)
+    const initialValue = parseInt(hiddenSelect.value, 10);
+    if (initialValue > 0) {
+        selectValue(initialValue);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initStarRating);
+if (document.readyState !== 'loading') {
+    initStarRating();
+}
+
+// ============ RASM LIGHTBOX (mahsulot detail sahifasi) ============
+function initImageLightbox() {
+    const trigger = document.getElementById('productImageZoom');
+    const overlay = document.getElementById('imageLightbox');
+    const closeBtn = document.getElementById('lightboxClose');
+
+    if (!trigger || !overlay) return;
+
+    function openLightbox() {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    trigger.addEventListener('click', openLightbox);
+    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initImageLightbox);
+if (document.readyState !== 'loading') {
+    initImageLightbox();
+}
+
+// ============ BANNER AVTO-SLIDER, PROGRESS BAR VA SICHQONCHA SUDRASH ============
 document.addEventListener("DOMContentLoaded", function () {
     const scrollContainer = document.getElementById('promoScroll');
     const prevBtn = document.getElementById('slidePrev');
@@ -260,6 +453,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const scrollAmount = 360;
     const autoPlayInterval = 4000;
     let autoPlayTimer;
+    let isDown = false;
+    let startX;
+    let scrollLeftStart;
 
     function getMaxScroll() {
         return scrollContainer.scrollWidth - scrollContainer.clientWidth;
@@ -318,39 +514,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateProgressBar();
     startAutoPlay();
-});
-// ============ SICHQONCHA BILAN SUDRAB O'TISH (mouse-drag) ============
-let isDown = false;
-let startX;
-let scrollLeftStart;
 
-scrollContainer.addEventListener('mousedown', (e) => {
-    isDown = true;
-    scrollContainer.classList.add('dragging');
-    startX = e.pageX - scrollContainer.offsetLeft;
-    scrollLeftStart = scrollContainer.scrollLeft;
-    stopAutoPlay();
+    // ---- Sichqoncha bilan sudrab o'tish (mouse-drag) ----
+    scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.classList.add('dragging');
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeftStart = scrollContainer.scrollLeft;
+        stopAutoPlay();
+    });
+
+    scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.classList.remove('dragging');
+        startAutoPlay();
+    });
+
+    scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.classList.remove('dragging');
+        startAutoPlay();
+    });
+
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 1.5; // sudrash tezligi
+        scrollContainer.scrollLeft = scrollLeftStart - walk;
+    });
 });
 
-scrollContainer.addEventListener('mouseleave', () => {
-    isDown = false;
-    scrollContainer.classList.remove('dragging');
-    startAutoPlay();
-});
-
-scrollContainer.addEventListener('mouseup', () => {
-    isDown = false;
-    scrollContainer.classList.remove('dragging');
-    startAutoPlay();
-});
-
-scrollContainer.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - scrollContainer.offsetLeft;
-    const walk = (x - startX) * 1.5; // sudrash tezligi
-    scrollContainer.scrollLeft = scrollLeftStart - walk;
-});
-// ============ NAVBAR SKROLL EFFEKTI (dublikat, xavfsizlik uchun) ============
-// Eslatma: yuqorida allaqachon .navbar (id=mainNavbar) uchun scroll effekt bor,
-// bu qism faqat umumiy .navbar klassiga ega boshqa elementlar uchun zaxira.

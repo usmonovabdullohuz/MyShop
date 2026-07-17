@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -134,7 +133,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.product.name} ({self.rating}★)"
-
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishlist")

@@ -1,8 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
 from blog.models import Product
 from .models import Cart, CartItem
+
+
+def _is_ajax(request):
+    return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
 
 @login_required
@@ -23,6 +28,15 @@ def cart_add(request, product_id):
     if not item_created:
         cart_item.quantity += 1
         cart_item.save()
+
+    cart_count = cart.items.count()
+
+    if _is_ajax(request):
+        return JsonResponse({
+            'success': True,
+            'message': f"{product.name} savatga qo'shildi",
+            'cart_count': cart_count,
+        })
 
     messages.success(request, f"{product.name} savatga qo'shildi.")
     return redirect('cart:cart_detail')

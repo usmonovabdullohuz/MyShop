@@ -103,7 +103,9 @@
                             {% endif %}
 
                             {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            <div class="img-skeleton-wrapper">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" onload="this.classList.add('img-loaded'); this.parentElement.classList.add('img-loaded');" onerror="this.parentElement.classList.add('img-loaded');">
+                            </div>
                             {% else %}
                             <div class="card-img-placeholder">Rasm yo'q</div>
                             {% endif %}
