@@ -27,7 +27,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = ProcessedImageField(
         upload_to='products/%Y/%m/%d/',
-        processors=[ResizeToFill(800, 800)], # Rasmni avtomat siqib beradi (sayt tez ishlashi uchun)
+        processors=[ResizeToFill(800, 800)],
         format='JPEG',
         options={'quality': 90},
         blank=True,
@@ -127,7 +127,6 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created']
-        # Bitta foydalanuvchi bitta mahsulotga faqat bitta sharh qoldira oladi
         unique_together = ('product', 'user')
         verbose_name = "Sharh"
         verbose_name_plural = "Sharhlar"
@@ -145,3 +144,5 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+
