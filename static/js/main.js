@@ -1,5 +1,4 @@
-// ============ RATING SELECT'NI CUSTOM-SELECT'DAN CHETLASH ============
-// Bu darhol ishga tushishi kerak, initCustomSelects() ishlashidan oldin
+
 (function markRatingSelect() {
     const wrapper = document.getElementById('starRatingInput');
     if (!wrapper) return;
@@ -7,8 +6,6 @@
     if (hiddenSelect) hiddenSelect.classList.add('rating-hidden-select');
 })();
 
-// ============ RASM SKELETON: KESHDAN DARHOL YUKLANGAN RASMLAR UCHUN ZAXIRA ============
-// Ba'zi brauzerlarda onload eventi keshdagi rasm uchun chaqirilmasligi mumkin
 function checkCachedImages() {
     document.querySelectorAll('.img-skeleton-wrapper img').forEach(img => {
         if (img.complete && img.naturalWidth > 0) {
@@ -545,3 +542,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.getElementById('sortSelect').addEventListener('change', function () {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', this.value);
+    window.location.href = url.toString();
+});

@@ -2,14 +2,20 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count, Min, Max
 from .models import Category, Product, Banner, Review, Wishlist
 from .forms import ReviewForm
 
 
 def product_list(request, category_slug=None):
     category = None
-    categories = Category.objects.all()
+
+    # Har bir kategoriya uchun mahsulotlar sonini bittada hisoblab olamiz
+    # (sidebar'da "Electronics (12)" kabi ko'rsatish uchun)
+    categories = Category.objects.annotate(
+        product_count=Count('products', filter=Q(products__available=True))
+    )
+
     products = Product.objects.filter(available=True)
     banners = Banner.objects.filter(is_active=True)
 
@@ -22,6 +28,46 @@ def product_list(request, category_slug=None):
         products = products.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
         )
+
+    # ============ NARX ORALIG'I FILTRI ============
+    # Slайder/inputlar uchun butun bazadagi min-max narxni olamiz
+    # (joriy filtrlardan mustaqil - foydalanuvchi doim to'liq oraliqni ko'rsin)
+    price_bounds = Product.objects.filter(available=True).aggregate(
+        min_price=Min('price'), max_price=Max('price')
+    )
+    db_min_price = price_bounds['min_price'] or 0
+    db_max_price = price_bounds['max_price'] or 0
+
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    if min_price:
+        try:
+            products = products.filter(price__gte=float(min_price))
+        except ValueError:
+            min_price = None
+
+    if max_price:
+        try:
+            products = products.filter(price__lte=float(max_price))
+        except ValueError:
+            max_price = None
+
+    # ============ FAQAT CHEGIRMADAGILAR ============
+    only_discount = request.GET.get('discount') == '1'
+    if only_discount:
+        products = products.filter(discount_percent__gt=0)
+
+    # ============ SARALASH ============
+    sort = request.GET.get('sort', 'newest')
+    sort_map = {
+        'newest': '-created',
+        'price_asc': 'price',
+        'price_desc': '-price',
+        'name_asc': 'name',
+        'discount': '-discount_percent',
+    }
+    products = products.order_by(sort_map.get(sort, '-created'))
 
     wishlist_ids = []
     if request.user.is_authenticated:
@@ -36,6 +82,12 @@ def product_list(request, category_slug=None):
         'query': query,
         'banners': banners,
         'wishlist_ids': wishlist_ids,
+        'sort': sort,
+        'min_price': min_price,
+        'max_price': max_price,
+        'db_min_price': db_min_price,
+        'db_max_price': db_max_price,
+        'only_discount': only_discount,
     })
 
 

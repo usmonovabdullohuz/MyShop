@@ -36,8 +36,6 @@
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
-
-
     </div>
     {% endif %}
 
@@ -53,44 +51,97 @@
     <div class="category-pills-scroll">
         {% for c in categories %}
         <a href="{% url 'blog:product_list_by_category' c.slug %}" class="category-pill-card">
-                <span class="category-pill-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path
-                            d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line
-                            x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                </span>
+            <span class="category-pill-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+            </span>
             {{ c.name }}
         </a>
         {% endfor %}
     </div>
-{% endif %} <div class="page-hero">
+{% endif %}
+
+<div class="page-hero">
     {% if query %}
     <h2>"{{ query }}" bo'yicha qidiruv natijalari</h2>
     {% else %}
     <h2>{% if category %}{{ category.name }}{% else %}Barcha mahsulotlar{% endif %}</h2>
     {% endif %}
-    <p class="subtitle">{{ products|length }} ta mahsulot topildi</p>
 </div>
 
 <div class="row">
-    <div class="col-md-3 mb-4">
+    <div class="col-lg-3 col-md-4 mb-4">
         <div class="category-sidebar">
             <h5>Kategoriyalar</h5>
-            <div class="list-group">
-                <a href="{% url 'blog:product_list' %}"
-                   class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
-                    Barchasi
-                </a>
-                {% for c in categories %}
-                <a href="{% url 'blog:product_list_by_category' c.slug %}"
-                   class="list-group-item list-group-item-action {% if category.slug == c.slug %}active{% endif %}">
-                    {{ c.name }}
-                </a>
-                {% endfor %}
-            </div>
+            <div class="filter-category-list">
+    <a href="{% url 'blog:product_list' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+       class="filter-category-item {% if not category %}active{% endif %}">
+        <span class="filter-category-name">Barchasi</span>
+        <span class="filter-category-count">{{ products.count }}</span>
+    </a>
+
+    {% for c in categories %}
+    <a href="{% url 'blog:product_list_by_category' c.slug %}"
+       class="filter-category-item {% if category.slug == c.slug %}active{% endif %}">
+        <span class="filter-category-name">{{ c.name }}</span>
+        <span class="filter-category-count">{{ c.product_count }}</span>
+    </a>
+    {% endfor %}
+</div>
+
+            <hr class="filter-divider">
+
+            <form method="get" id="filterForm">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+
+                <h5>Narx oralig'i</h5>
+                <div class="filter-price-inputs">
+                    <div class="filter-price-field">
+                        <span>$</span>
+                        <input type="number" name="min_price" placeholder="{{ db_min_price|floatformat:0 }}"
+                               value="{{ min_price|default:'' }}" min="0" step="1">
+                    </div>
+                    <span class="filter-price-sep">—</span>
+                    <div class="filter-price-field">
+                        <span>$</span>
+                        <input type="number" name="max_price" placeholder="{{ db_max_price|floatformat:0 }}"
+                               value="{{ max_price|default:'' }}" min="0" step="1">
+                    </div>
+                </div>
+
+                <label class="filter-checkbox-row">
+                    <input type="checkbox" name="discount" value="1" {% if only_discount %}checked{% endif %}>
+                    <span class="filter-checkbox-box"></span>
+                    <span>Faqat chegirmadagilar</span>
+                </label>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">Filtrlash</button>
+                {% if request.GET.min_price or request.GET.max_price or request.GET.discount %}
+                <a href="{{ request.path }}{% if query %}?q={{ query }}{% endif %}" class="filter-clear-link">Filtrlarni tozalash</a>
+                {% endif %}
+            </form>
         </div>
     </div>
 
-    <div class="col-md-9">
+    <div class="col-lg-9 col-md-8">
+        <div class="results-toolbar">
+            <p class="results-count">{{ products|length }} ta mahsulot topildi</p>
+
+            <div class="sort-select-wrapper">
+                <label for="sortSelect" class="sort-label">Saralash:</label>
+                <select id="sortSelect" class="form-select sort-select">
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Yangi qo'shilgan</option>
+                    <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Narx: arzondan qimmatga</option>
+                    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Narx: qimmatdan arzonga</option>
+                    <option value="discount" {% if sort == 'discount' %}selected{% endif %}>Chegirma bo'yicha</option>
+                    <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Nomi bo'yicha (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for product in products %}
             <div class="col">
@@ -138,7 +189,6 @@
                                 </svg>
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -151,12 +201,14 @@
                 {% if query %}
                 <p>"{{ query }}" bo'yicha hech narsa topilmadi.</p>
                 {% else %}
-                <p>Hozircha mahsulotlar marginsiz emas.</p>
+                <p>Hozircha bu filtrlarga mos mahsulot topilmadi.</p>
                 {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
+<script src="{% static 'js/main.js' %}"></script>
 
 {% endblock %}
