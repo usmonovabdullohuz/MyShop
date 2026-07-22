@@ -1998,9 +1998,6 @@ footer {
 /* ==========================================================================
    GLOBAL SPINNER (ma'lumot fetch qilinayotganda ko'rinadigan overlay)
    ========================================================================== */
-/* ==========================================================================
-   GLOBAL SPINNER (ma'lumot fetch qilinayotganda ko'rinadigan overlay)
-   ========================================================================== */
 .global-spinner-overlay {
     position: fixed;
     inset: 0;
@@ -2047,7 +2044,7 @@ footer {
 
 .loader-brand-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.8rem;
+    font-size: 2.8rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--accent-gold), var(--accent-teal));
     -webkit-background-clip: text;
@@ -2058,8 +2055,8 @@ footer {
 }
 
 .loader-bar-track {
-    width: 140px;
-    height: 3px;
+    width: 240px;
+    height: 4px;
     border-radius: 10px;
     background: rgba(245, 243, 247, 0.1);
     overflow: hidden;
@@ -2596,7 +2593,8 @@ footer {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transform: scale(0.92);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     padding: 2rem;
 }
 
@@ -2604,6 +2602,21 @@ footer {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transform: scale(1);
+}
+
+.image-lightbox-overlay .lightbox-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.image-lightbox-overlay.open .lightbox-img {
+    transform: scale(1);
 }
 
 .lightbox-close {
@@ -2708,7 +2721,7 @@ footer {
 
 .img-skeleton-wrapper img {
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .img-skeleton-wrapper img.img-loaded {
@@ -2758,4 +2771,284 @@ footer {
 
 .img-skeleton-wrapper {
     max-width: 100%;
+}
+
+/* ==========================================================================
+   FILTR SIDEBAR — KATEGORIYA RO'YXATI (counter bilan)
+   ========================================================================== */
+.filter-category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    color: var(--text-light);
+    font-size: 0.92rem;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+}
+
+.filter-category-item:hover {
+    background: var(--bg-card-hover);
+    color: var(--accent-gold);
+    padding-left: 1rem;
+}
+
+.filter-category-item.active {
+    background: linear-gradient(135deg, rgba(242, 184, 75, 0.16), rgba(242, 184, 75, 0.05));
+    border-color: rgba(242, 184, 75, 0.35);
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+.filter-category-count {
+    background: rgba(245, 243, 247, 0.08);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    min-width: 26px;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-category-item.active .filter-category-count {
+    background: var(--accent-gold);
+    color: #1a1b2e;
+}
+
+.filter-category-item:hover .filter-category-count {
+    background: rgba(242, 184, 75, 0.2);
+    color: var(--accent-gold);
+}
+
+/* ==========================================================================
+   FILTR SIDEBAR — AJRATUVCHI CHIZIQ
+   ========================================================================== */
+.filter-divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 1.3rem 0;
+}
+
+/* ==========================================================================
+   FILTR SIDEBAR — NARX ORALIG'I
+   ========================================================================== */
+.filter-price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+}
+
+.filter-price-field {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(245, 243, 247, 0.04);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 0.5rem 0.7rem;
+    flex: 1;
+    min-width: 0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-price-field:focus-within {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px rgba(242, 184, 75, 0.12);
+}
+
+.filter-price-field span {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.filter-price-field input {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 0.88rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+
+.filter-price-field input:focus {
+    outline: none;
+}
+
+/* Brauzer default number spinner o'qlarini olib tashlash */
+.filter-price-field input::-webkit-outer-spin-button,
+.filter-price-field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.filter-price-field input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.filter-price-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   FILTR SIDEBAR — CUSTOM CHECKBOX
+   ========================================================================== */
+.filter-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+.filter-checkbox-row input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.filter-checkbox-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border-soft);
+    background: rgba(245, 243, 247, 0.04);
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.filter-checkbox-box::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #1a1b2e;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s ease;
+}
+
+.filter-checkbox-row input:checked ~ .filter-checkbox-box {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+}
+
+.filter-checkbox-row input:checked ~ .filter-checkbox-box::after {
+    transform: rotate(45deg) scale(1);
+}
+
+.filter-checkbox-row input:focus-visible ~ .filter-checkbox-box {
+    box-shadow: 0 0 0 3px rgba(242, 184, 75, 0.2);
+}
+
+.filter-clear-link {
+    display: block;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.8rem;
+    transition: color 0.2s ease;
+}
+
+.filter-clear-link:hover {
+    color: var(--accent-danger);
+}
+
+/* ==========================================================================
+   NATIJALAR TOOLBAR (son + saralash)
+   ========================================================================== */
+.results-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.results-count {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.sort-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.sort-label {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.sort-select {
+    background-color: rgba(245, 243, 247, 0.04) !important;
+    border: 1px solid var(--border-soft) !important;
+    color: var(--text-light) !important;
+    padding: 0.55rem 2.3rem 0.55rem 1rem !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23f2b84b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 0 3px rgba(242, 184, 75, 0.12);
+    outline: none;
+}
+
+.sort-select option {
+    background-color: var(--bg-card);
+    color: var(--text-light);
+}
+
+@media (max-width: 767px) {
+    .results-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .sort-select-wrapper {
+        width: 100%;
+    }
+    .sort-select {
+        flex: 1;
+    }
 }

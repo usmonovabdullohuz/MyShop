@@ -15,7 +15,6 @@ def checkout(request):
         messages.warning(request, "Savatingiz bo'sh. Buyurtma berish uchun avval mahsulot qo'shing.")
         return redirect('cart:cart_detail')
 
-    # Foydalanuvchi profilidan telefon/manzilni oldindan to'ldirib qo'yamiz (bor bo'lsa)
     initial = {
         'full_name': request.user.get_full_name() or request.user.username,
     }
