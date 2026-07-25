@@ -2,9 +2,13 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Q, Count, Min, Max
+from django.template.loader import render_to_string
 from .models import Category, Product, Banner, Review, Wishlist
 from .forms import ReviewForm
+
+PRODUCTS_PER_PAGE = 12
 
 
 def product_list(request, category_slug=None):
@@ -16,7 +20,7 @@ def product_list(request, category_slug=None):
         product_count=Count('products', filter=Q(products__available=True))
     )
 
-    products = Product.objects.filter(available=True)
+    products = Product.objects.filter(available=True).select_related('category')
     banners = Banner.objects.filter(is_active=True)
 
     if category_slug:
@@ -75,10 +79,17 @@ def product_list(request, category_slug=None):
             Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True)
         )
 
-    return render(request, 'blog/product/list.html', {
+    total_count = products.count()
+    paginator = Paginator(products, PRODUCTS_PER_PAGE)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    context = {
         'category': category,
         'categories': categories,
-        'products': products,
+        'products': page_obj,
+        'page_obj': page_obj,
+        'total_count': total_count,
         'query': query,
         'banners': banners,
         'wishlist_ids': wishlist_ids,
@@ -88,7 +99,24 @@ def product_list(request, category_slug=None):
         'db_min_price': db_min_price,
         'db_max_price': db_max_price,
         'only_discount': only_discount,
-    })
+    }
+
+    # AJAX so'rov bo'lsa (filtr/sort/pagination JS orqali) — baribir
+    # list.html'ning o'zini render qilamiz (alohida partial fayl kerak
+    # emas); JS tomonda faqat #productGridContainer qismi olinib,
+    # sahifadagi mos joyga almashtiriladi
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        full_html = render_to_string('blog/product/list.html', context, request=request)
+        return JsonResponse({
+            'html': full_html,
+            'total_count': total_count,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+            'current_page': page_obj.number,
+            'num_pages': paginator.num_pages,
+        })
+
+    return render(request, 'blog/product/list.html', context)
 
 
 def product_detail(request, id, slug):

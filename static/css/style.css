@@ -3052,3 +3052,87 @@ footer {
         flex: 1;
     }
 }
+
+
+
+#productGridContainer {
+    position: relative;
+    min-height: 200px;
+    transition: opacity 0.2s ease;
+}
+
+#productGridContainer.grid-loading {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+#productGridContainer.grid-loading::after {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin-left: -18px;
+    border-radius: 50%;
+    border: 3px solid rgba(245, 243, 247, 0.15);
+    border-top-color: var(--accent-gold);
+    animation: global-spinner-spin 0.7s linear infinite;
+}
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.pagination-list {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.6rem;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.page-btn:hover:not(:disabled) {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
+.page-btn.active {
+    background: linear-gradient(135deg, var(--accent-gold), #d99a2b);
+    color: #1a1b2e;
+    border-color: transparent;
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}

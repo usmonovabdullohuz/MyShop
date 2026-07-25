@@ -17,6 +17,9 @@
     if (document.readyState !== 'loading') {
         checkCachedImages();
     }
+    // AJAX orqali mahsulotlar gridi yangilanganda (filtr/sort/pagination)
+    // yangi <img> elementlar uchun ham cache holatini tekshiramiz
+    window.addEventListener('productGrid:updated', checkCachedImages);
 
     function hideLoader() {
         const loader = document.getElementById('page-loader');
@@ -578,3 +581,118 @@
             window.location.href = url.toString();
         });
     }
+
+/* ==========================================================================
+   MAHSULOTLAR RO'YXATI — AJAX FILTR / SARALASH / SAHIFALASH
+   Maqsad: filtr yoki sort o'zgarganda butun sahifa emas, faqat
+   mahsulotlar gridi qayta yuklansin (pro SPA-hissi, oddiy JS bilan).
+   ========================================================================== */
+(function () {
+    const gridContainer = document.getElementById('productGridContainer');
+    const filterForm = document.getElementById('filterForm');
+    const sortSelect = document.getElementById('sortSelect');
+    const resultsCount = document.getElementById('resultsCount');
+
+    if (!gridContainer) return;
+
+    function currentParams() {
+        return new URLSearchParams(window.location.search);
+    }
+
+    async function loadProducts(params, { pushState = true } = {}) {
+        gridContainer.classList.add('grid-loading');
+
+        const url = `${window.location.pathname}?${params.toString()}`;
+
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+            if (!response.ok) throw new Error('Server xatosi');
+            const data = await response.json();
+
+            // Server endi butun sahifani (navbar bilan) qaytaradi —
+            // shuning uchun faqat kerakli #productGridContainer qismini
+            // ajratib olib, joriy sahifadagi mos joyga qo'yamiz
+            const parser = new DOMParser();
+            const newDoc = parser.parseFromString(data.html, 'text/html');
+            const newGrid = newDoc.getElementById('productGridContainer');
+
+            if (newGrid) {
+                gridContainer.innerHTML = newGrid.innerHTML;
+            }
+
+            if (resultsCount) {
+                resultsCount.textContent = `${data.total_count} ta mahsulot topildi`;
+            }
+
+            if (pushState) {
+                window.history.pushState({ ajax: true }, '', url);
+            }
+
+            // Yangi renderlangan kartalar uchun animatsiya/wishlist/lazy-load
+            // hodisalarini qayta ulash kerak
+            window.dispatchEvent(new CustomEvent('productGrid:updated'));
+
+            gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            console.error('Mahsulotlarni yuklashda xatolik:', err);
+            // Muvaffaqiyatsiz bo'lsa — oddiy to'liq sahifa yuklashga tushamiz,
+            // foydalanuvchi hech bo'lmasa natijani ko'radi
+            window.location.href = url;
+        } finally {
+            gridContainer.classList.remove('grid-loading');
+        }
+    }
+
+    // ---- Filtr formasi (narx, chegirma) ----
+    if (filterForm) {
+        filterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const params = new URLSearchParams(new FormData(filterForm));
+            // bo'sh qiymatlarni tashlab yuboramiz (toza URL uchun)
+            [...params.keys()].forEach((key) => {
+                if (!params.get(key)) params.delete(key);
+            });
+            loadProducts(params);
+        });
+    }
+
+    // ---- Saralash select ----
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            const params = currentParams();
+            params.set('sort', sortSelect.value);
+            params.delete('page');
+            loadProducts(params);
+        });
+    }
+
+    // ---- Kategoriya linklari va "Filtrlarni tozalash" ----
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('[data-ajax-link]');
+        if (!link) return;
+        e.preventDefault();
+        const linkUrl = new URL(link.href, window.location.origin);
+        loadProducts(linkUrl.searchParams, { pushState: true });
+        // Yo'l (path) o'zgarishi mumkin (masalan boshqa kategoriya slug'i),
+        // shuning uchun pathname'ni ham yangilaymiz
+        if (linkUrl.pathname !== window.location.pathname) {
+            window.history.replaceState({ ajax: true }, '', linkUrl.pathname + linkUrl.search);
+        }
+    });
+
+    // ---- Pagination tugmalari (delegatsiya, chunki grid qayta render bo'ladi) ----
+    gridContainer.addEventListener('click', (e) => {
+        const pageBtn = e.target.closest('.page-btn');
+        if (!pageBtn || pageBtn.disabled) return;
+        const params = currentParams();
+        params.set('page', pageBtn.dataset.page);
+        loadProducts(params);
+    });
+
+    // ---- Brauzer orqaga/oldinga tugmalari ----
+    window.addEventListener('popstate', () => {
+        loadProducts(currentParams(), { pushState: false });
+    });
+})();

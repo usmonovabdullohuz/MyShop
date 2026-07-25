@@ -38,9 +38,7 @@ class Product(models.Model):
         help_text="Chegirma foizi (0-100). Masalan 25 kiritsangiz, 25% chegirma bo'ladi.",
         null=True,
         blank=True
-
     )
-    image = models.ImageField(upload_to='products/%Y/%m/%d/', blank=True)
     stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -48,7 +46,13 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['-created']
-        indexes = [models.Index(fields=['id', 'slug'])]
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['available', 'category']),
+            models.Index(fields=['available', '-created']),
+            models.Index(fields=['available', 'price']),
+            models.Index(fields=['available', '-discount_percent']),
+        ]
 
     def __str__(self):
         return self.name
@@ -144,5 +148,3 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
-
-
