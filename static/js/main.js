@@ -17,8 +17,6 @@
     if (document.readyState !== 'loading') {
         checkCachedImages();
     }
-    // AJAX orqali mahsulotlar gridi yangilanganda (filtr/sort/pagination)
-    // yangi <img> elementlar uchun ham cache holatini tekshiramiz
     window.addEventListener('productGrid:updated', checkCachedImages);
 
     function hideLoader() {
@@ -71,11 +69,6 @@
         }
     }
 
-    // Xavfsizlik to'ri: agar biror joyda showSpinner() hideSpinner()siz
-    // qolib ketsa (masalan kutilmagan xato tufayli), counter cheksiz
-    // o'sib, spinner butunlay "osilib qolgan" holga tushib qolmasligi
-    // uchun - eng ko'p 10 soniyadan keyin overlay majburan yopiladi va
-    // counter nolga tushiriladi.
     let __spinnerSafetyTimer = null;
     const __originalShowSpinner = showSpinner;
     showSpinner = function () {
@@ -95,7 +88,6 @@
         }
     };
 
-    // ============ NAVBAR SCROLL EFFEKTI + PROGRESS + BACK TO TOP ============
     const navbar = document.getElementById('mainNavbar');
     const backToTopBtn = document.getElementById('back-to-top');
 
@@ -135,7 +127,6 @@
         });
     }
 
-    // ============ SCROLL'DA PAYDO BO'LISH (reveal) ============
     const revealElements = document.querySelectorAll('.reveal, .reveal-up');
 
     if (revealElements.length > 0) {
@@ -151,7 +142,6 @@
         revealElements.forEach(el => revealObserver.observe(el));
     }
 
-    // ============ PAROLNI KO'RSATISH/YASHIRISH ============
     const eyeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const eyeOffIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
@@ -176,7 +166,6 @@
         });
     });
 
-    // ============ TOAST XABAR FUNKSIYASI ============
     function showToast(message) {
         const existing = document.querySelector('.toast-notify');
         if (existing) existing.remove();
@@ -198,7 +187,6 @@
         }, 3000);
     }
 
-    // ============ CUSTOM SELECT (dizaynga mos ochiladigan dropdown) ============
     function initCustomSelects() {
         document.querySelectorAll('select.form-select:not(.custom-select-done):not(.rating-hidden-select)').forEach(select => {
             select.classList.add('custom-select-done');
@@ -278,7 +266,6 @@
         initCustomSelects();
     }
 
-    // ============ KATALOG DROPDOWN ============
     const catalogDropdown = document.querySelector('.catalog-dropdown');
     const catalogBtn = document.querySelector('.catalog-btn');
 
@@ -344,11 +331,6 @@
         }
     });
 
-    // ============ SAVATGA QO'SHISH (AJAX + TOAST) ============
-    // Xuddi shu sabab bilan delegatsiyaga o'tkazildi: qidiruv natijalarida
-    // yoki keyinroq DOM'ga qo'shilgan "Savatga qo'shish" tugmalari ham
-    // ishlashi kerak - avval faqat sahifa birinchi ochilgandagi tugmalar
-    // ishlar edi.
     document.addEventListener('click', async (e) => {
         const btn = e.target.closest('.cart-add-btn');
         if (!btn) return;
@@ -387,7 +369,6 @@
         }
     });
 
-    // ============ INTERAKTIV YULDUZCHA REYTING (sharh formasi) ============
     function initStarRating() {
         const wrapper = document.getElementById('starRatingInput');
         if (!wrapper) return;
@@ -424,7 +405,7 @@
             stars.forEach(star => star.classList.remove('hovered'));
         });
 
-        // Agar formada oldindan tanlangan qiymat bo'lsa (masalan validatsiya xatosidan keyin qayta ko'rsatilsa)
+
         const initialValue = parseInt(hiddenSelect.value, 10);
         if (initialValue > 0) {
             selectValue(initialValue);
@@ -436,7 +417,6 @@
         initStarRating();
     }
 
-    // ============ RASM LIGHTBOX (mahsulot detail sahifasi) ============
     function initImageLightbox() {
         const trigger = document.getElementById('productImageZoom');
         const overlay = document.getElementById('imageLightbox');
@@ -471,7 +451,6 @@
         initImageLightbox();
     }
 
-    // ============ BANNER AVTO-SLIDER, PROGRESS BAR VA SICHQONCHA SUDRASH ============
     document.addEventListener("DOMContentLoaded", function () {
         const scrollContainer = document.getElementById('promoScroll');
         const prevBtn = document.getElementById('slidePrev');
@@ -502,7 +481,7 @@
         function slideNext() {
             const maxScrollLeft = getMaxScroll();
             if (scrollContainer.scrollLeft >= maxScrollLeft - 15) {
-                scrollContainer.scrollLeft = 0; // oxiriga yetganda boshiga qaytadi
+                scrollContainer.scrollLeft = 0;
             } else {
                 scrollContainer.scrollLeft += scrollAmount;
             }
@@ -569,7 +548,7 @@
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX - scrollContainer.offsetLeft;
-            const walk = (x - startX) * 1.5; // sudrash tezligi
+            const walk = (x - startX) * 1.5;
             scrollContainer.scrollLeft = scrollLeftStart - walk;
         });
     });
@@ -582,11 +561,6 @@
         });
     }
 
-/* ==========================================================================
-   MAHSULOTLAR RO'YXATI — AJAX FILTR / SARALASH / SAHIFALASH
-   Maqsad: filtr yoki sort o'zgarganda butun sahifa emas, faqat
-   mahsulotlar gridi qayta yuklansin (pro SPA-hissi, oddiy JS bilan).
-   ========================================================================== */
 (function () {
     const gridContainer = document.getElementById('productGridContainer');
     const filterForm = document.getElementById('filterForm');
@@ -611,9 +585,6 @@
             if (!response.ok) throw new Error('Server xatosi');
             const data = await response.json();
 
-            // Server endi butun sahifani (navbar bilan) qaytaradi —
-            // shuning uchun faqat kerakli #productGridContainer qismini
-            // ajratib olib, joriy sahifadagi mos joyga qo'yamiz
             const parser = new DOMParser();
             const newDoc = parser.parseFromString(data.html, 'text/html');
             const newGrid = newDoc.getElementById('productGridContainer');
@@ -630,27 +601,21 @@
                 window.history.pushState({ ajax: true }, '', url);
             }
 
-            // Yangi renderlangan kartalar uchun animatsiya/wishlist/lazy-load
-            // hodisalarini qayta ulash kerak
             window.dispatchEvent(new CustomEvent('productGrid:updated'));
 
             gridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (err) {
             console.error('Mahsulotlarni yuklashda xatolik:', err);
-            // Muvaffaqiyatsiz bo'lsa — oddiy to'liq sahifa yuklashga tushamiz,
-            // foydalanuvchi hech bo'lmasa natijani ko'radi
             window.location.href = url;
         } finally {
             gridContainer.classList.remove('grid-loading');
         }
     }
 
-    // ---- Filtr formasi (narx, chegirma) ----
     if (filterForm) {
         filterForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const params = new URLSearchParams(new FormData(filterForm));
-            // bo'sh qiymatlarni tashlab yuboramiz (toza URL uchun)
             [...params.keys()].forEach((key) => {
                 if (!params.get(key)) params.delete(key);
             });
@@ -658,7 +623,6 @@
         });
     }
 
-    // ---- Saralash select ----
     if (sortSelect) {
         sortSelect.addEventListener('change', () => {
             const params = currentParams();
@@ -668,21 +632,17 @@
         });
     }
 
-    // ---- Kategoriya linklari va "Filtrlarni tozalash" ----
     document.addEventListener('click', (e) => {
         const link = e.target.closest('[data-ajax-link]');
         if (!link) return;
         e.preventDefault();
         const linkUrl = new URL(link.href, window.location.origin);
         loadProducts(linkUrl.searchParams, { pushState: true });
-        // Yo'l (path) o'zgarishi mumkin (masalan boshqa kategoriya slug'i),
-        // shuning uchun pathname'ni ham yangilaymiz
         if (linkUrl.pathname !== window.location.pathname) {
             window.history.replaceState({ ajax: true }, '', linkUrl.pathname + linkUrl.search);
         }
     });
 
-    // ---- Pagination tugmalari (delegatsiya, chunki grid qayta render bo'ladi) ----
     gridContainer.addEventListener('click', (e) => {
         const pageBtn = e.target.closest('.page-btn');
         if (!pageBtn || pageBtn.disabled) return;
@@ -691,7 +651,6 @@
         loadProducts(params);
     });
 
-    // ---- Brauzer orqaga/oldinga tugmalari ----
     window.addEventListener('popstate', () => {
         loadProducts(currentParams(), { pushState: false });
     });
