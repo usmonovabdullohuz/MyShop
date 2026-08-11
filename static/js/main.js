@@ -696,3 +696,4 @@
         loadProducts(currentParams(), { pushState: false });
     });
 })();
+

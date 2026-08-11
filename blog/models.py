@@ -79,7 +79,6 @@ class Product(models.Model):
         return self.reviews.count()
 
 
-# ============ YANGI QISM - shu yerga qo'shiladi ============
 class Banner(models.Model):
     COLOR_CHOICES = [
         ('promo-1', 'Binafsha-ko\'k'),
