@@ -4,3 +4,4 @@ django-jazzmin
 gunicorn
 whitenoise
 dj-database-url
+django-imagekit
