@@ -16,9 +16,7 @@ SECRET_KEY = os.environ.get(
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "usmonov77.pythonanywhere.com",  # <-- o'zingizning PythonAnywhere usernameingizni yozing
-    "127.0.0.1",
-    "localhost",
+    "myshop-1-cgjv.onrender.com"
 ]
 
 # Application definition
